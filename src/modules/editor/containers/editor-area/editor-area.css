@@ -1,0 +1,15 @@
+.editor-area{
+    display: flex;
+    background: var(--paper);
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+    padding: 1rem;
+}
+
+.editor-area__canvas {
+    box-shadow: 0 0 5px var(--shadows);
+    width: 50%;
+    max-height: 50%;
+    cursor: none;
+}
