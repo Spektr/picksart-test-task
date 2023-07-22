@@ -1,0 +1,20 @@
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.app__header {
+    flex: 0 0 auto;
+    padding: 1rem;
+    text-align: center;
+    font-size: 2rem;
+    background: var(--primary);
+    color: var(--contrast-text);
+}
+
+.app__body {
+    flex: 1 0 auto;
+    background: var(--background);
+    padding: 1rem;
+}
