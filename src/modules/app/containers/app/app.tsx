@@ -2,6 +2,7 @@ import React, {useContext} from 'react';
 import './app.css';
 import {Toolbar} from "../../../editor/containers/toolbar/toolbar";
 import {EditorArea} from "../../../editor/containers/editor-area/editor-area";
+import {ColorPickerCursor} from "../../../editor/containers/color-picker-cursor/color-picker-cursor";
 import {GlobalContext} from "../../../../store/global-context";
 
 export const App = () => {
@@ -15,7 +16,7 @@ export const App = () => {
 
             <main className="app__body">
                 <Toolbar/>
-                {isColorPickerEnabled}
+                {isColorPickerEnabled && <ColorPickerCursor/>}
                 <EditorArea/>
             </main>
         </div>
