@@ -1,7 +1,7 @@
 import React from "react";
 
 interface IProps {
-    size?: number;
+    size?: number;  // technically we can use 100% inside svg, but it is not protect against width !== height
     color?: string;
 }
 

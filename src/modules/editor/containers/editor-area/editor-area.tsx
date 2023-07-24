@@ -4,7 +4,7 @@ import {GlobalContext} from "../../../../store/global-context";
 import {Editor} from "../../shared/models/editor/editor";
 
 export const EditorArea = (): React.JSX.Element => {
-    const {setState} = useContext(GlobalContext);
+    const {state: {isColorPickerEnabled}, setState} = useContext(GlobalContext);
     const canvas = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -18,7 +18,7 @@ export const EditorArea = (): React.JSX.Element => {
 
     return (
         <div className="editor-area">
-            <canvas ref={canvas} className="editor-area__canvas">
+            <canvas ref={canvas} className="editor-area__canvas" style={{cursor: isColorPickerEnabled ? 'none': 'auto'}}>
                 <div>Canvas wasn't supported by this browser, you are looser ^_^</div>
             </canvas>
         </div>

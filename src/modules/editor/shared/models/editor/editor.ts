@@ -7,7 +7,7 @@ export class Editor implements IEditor {
     private height = 400;
 
     constructor(readonly canvas: HTMLCanvasElement, type = '2d') {
-        const context = canvas.getContext('2d');
+        const context = canvas.getContext('2d', {willReadFrequently: true});
 
         if (!context) {
             throw new Error(`Canvas context ${type} is not supported`);
@@ -27,7 +27,7 @@ export class Editor implements IEditor {
         const rootSizes = this.canvas.getBoundingClientRect();
         x *= (this.width / rootSizes.width);
         y *= (this.height / rootSizes.height);
-        return {x:Math.round(x), y:Math.round(y)};
+        return {x: Math.round(x), y: Math.round(y)};
     }
 
     getColor(x: number, y: number): string {

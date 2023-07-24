@@ -9,7 +9,7 @@
 
 .editor-area__canvas {
     box-shadow: 0 0 5px var(--shadows);
-    width: 50%;
+    max-width: 80%;
     max-height: 50%;
     cursor: none;
 }

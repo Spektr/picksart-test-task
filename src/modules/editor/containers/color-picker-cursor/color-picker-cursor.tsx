@@ -5,13 +5,28 @@ import {SelectedColorIcon} from "../../../../shared/icons/selected-color-icon";
 import {createPortal} from "react-dom";
 import {drawPixelGrid} from "../../shared/utils/draw-pixel-grid";
 
+/**
+ *  Calculate proper cursor size (f.e 10x10 grid + 1 to intersection)
+ * @param zoom      - zoom level (one pixel representation)
+ * @param boundary  - no more than this size
+ */
+function calculateCursorSize(zoom: number, boundary = 200) {
+    const parts = Math.floor(boundary / zoom);
+    return zoom * parts + (parts & 1 ? 0 : zoom);
+}
+
 export const ColorPickerCursor = (): React.JSX.Element => {
     const {state: {editor, zoom}, setState} = useContext(GlobalContext);
-    const [size, setSize] = useState<number>(zoom * (zoom <= 10 ? 20 : 10) + zoom); // 10x10 grid + 1 to intersection
+    const [size, setSize] = useState<number>(calculateCursorSize(zoom));
     const [top, setTop] = useState<number>(0);
     const [left, setLeft] = useState<number>(0);
     const [hoveredColor, setHoveredColor] = useState<string>();
+    const [enabled, setEnabled] = useState<boolean>(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    useEffect(() => {
+        setSize(calculateCursorSize(zoom));
+    }, [zoom, setSize]);
 
     useEffect(() => {
         if (!editor || !canvasRef.current) {
@@ -27,8 +42,19 @@ export const ColorPickerCursor = (): React.JSX.Element => {
 
         const updateCursorBackgroundHandler = (e: MouseEvent) => {
             const {x, y} = editor.getAdjustedCoords(e.offsetX, e.offsetY);
-            ctx.drawImage(editor.canvas, x, y, size / zoom, size / zoom, 0, 0, size, size);
-            drawPixelGrid(ctx, size, size, zoom);
+            const srcSize = size / zoom;
+            const shift = Math.round(srcSize / 2);
+
+            // fill by white background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, size, size);
+
+            ctx.drawImage(editor.canvas, x - shift, y - shift, srcSize, srcSize, 0, 0, size, size);
+
+            // if zoom level is small then grid doesn't need
+            if (zoom > 10) {
+                drawPixelGrid(ctx, size, size, zoom);
+            }
             setHoveredColor(editor.getColor(x, y));
         };
         const trackCursorPositionHandler = (e: MouseEvent) => {
@@ -40,20 +66,27 @@ export const ColorPickerCursor = (): React.JSX.Element => {
             setState((state) => ({...state, pickedColor: editor.getColor(x, y)}));
         }
 
+        const enableHandler = () => setEnabled(true);
+        const disableHandler = () => setEnabled(false);
+
         editor.addEventListener('mousemove', updateCursorBackgroundHandler);
         editor.addEventListener('mousemove', trackCursorPositionHandler);
         editor.addEventListener('click', selectColorHandler);
+        editor.addEventListener('mouseover', enableHandler);
+        editor.addEventListener('mouseout', disableHandler);
 
         return () => {
             editor.removeEventListener('mousemove', updateCursorBackgroundHandler);
             editor.removeEventListener('mousemove', trackCursorPositionHandler);
             editor.removeEventListener('click', selectColorHandler);
+            editor.removeEventListener('mouseover', enableHandler);
+            editor.removeEventListener('mouseout', disableHandler);
         };
 
-    }, [editor, canvasRef]);
+    }, [editor, canvasRef, zoom, size, setState]);
 
     return createPortal(
-        (<div className="color-picker-cursor" style={{width: size, height: size, top, left}}>
+        (<div className="color-picker-cursor" style={{display: enabled ? 'flex' : 'none', width: size, height: size, top, left}}>
             <div className="editor-cursor__wrapper">
                 <canvas
                     ref={canvasRef}
@@ -66,10 +99,7 @@ export const ColorPickerCursor = (): React.JSX.Element => {
                 <div className="editor-cursor__circle">
                     <SelectedColorIcon size={size} color={hoveredColor || '#ffffff'}/>
                 </div>
-                <div
-                    style={{marginTop: zoom * 4}}
-                    className="color-picker-cursor__title"
-                >{hoveredColor}</div>
+                <div className="color-picker-cursor__title">{hoveredColor}</div>
             </div>
         </div>),
         document.body
